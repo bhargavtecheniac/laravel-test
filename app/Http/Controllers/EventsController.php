@@ -16,7 +16,7 @@ class EventsController extends BaseController
     }
 
     /*
-     Requirements:
+    Requirements:
     - maximum 2 sql queries
     - verify your solution with `php artisan test`
     - do a `git commit && git push` after you are done or when the time limit is over
@@ -102,7 +102,7 @@ class EventsController extends BaseController
 
     public function getEventsWithWorkshops() {
         $eventsWithWorkshops = Event::with('workshops')->get();
-        return response()->json(['data'=>$eventsWithWorkshops]);
+        return response()->json($eventsWithWorkshops);
     }
 
 
@@ -180,13 +180,7 @@ class EventsController extends BaseController
     ```
      */
     public function getFutureEventsWithWorkshops() {
-        $futureEventsWithWorkshops = Event::with('future_workshops')->get();
-        $futureEvent = [];
-        foreach($futureEventsWithWorkshops as $event){
-            if(count($event->future_workshops) > 0){
-                $futureEvent[] = $event;
-            }
-        }
-        return response()->json($futureEvent);
+        $futureEventsWithWorkshops = Event::whereHas('future_workshops')->with('future_workshops')->get();
+        return response()->json($futureEventsWithWorkshops);
     }
 }
