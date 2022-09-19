@@ -101,8 +101,8 @@ class EventsController extends BaseController
      */
 
     public function getEventsWithWorkshops() {
-        $events = Event::all();
-        return response()->json(['data'=>$events]);
+        $eventsWithWorkshops = Event::with('workshops')->get();
+        return response()->json(['data'=>$eventsWithWorkshops]);
     }
 
 
@@ -179,9 +179,14 @@ class EventsController extends BaseController
     ]
     ```
      */
-
     public function getFutureEventsWithWorkshops() {
-        $events = Event::all();
-        return response()->json(['data'=>$events]);
+        $futureEventsWithWorkshops = Event::with('future_workshops')->get();
+        $futureEvent = [];
+        foreach($futureEventsWithWorkshops as $event){
+            if(count($event->future_workshops) > 0){
+                $futureEvent[] = $event;
+            }
+        }
+        return response()->json($futureEvent);
     }
 }
