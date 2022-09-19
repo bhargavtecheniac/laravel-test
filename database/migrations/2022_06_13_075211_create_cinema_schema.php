@@ -37,30 +37,91 @@ class CreateCinemaSchema extends Migration
      */
     public function up()
     {
-        Schema::create('cinema', function($table) {
+        Schema::create('city', function($table) {
             $table->increments('id');
             $table->string('name');
+            $table->string('state');
+            $table->string('zip_code');
             $table->timestamps();
         });
 
-        Schema::create('movies', function($table) {
+        Schema::create('cinema', function($table) {
             $table->increments('id');
-            $table->integer('cinema_id')->unsigned();
             $table->string('name');
-            $table->double('price')->default(0);
-            $table->integer('vip_seats')->default(0);
+            $table->string('address');
+            $table->integer('city_id')->unsigned()->nullable();
+            $table->foreign('city_id')->references('id')->on('city');
+            $table->timestamps();
+        });
+        
+        Schema::create('cinema_hall', function($table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->integer('total_seats');            
+            $table->integer('no_of_vip_seats');
+            $table->integer('cinema_id')->unsigned()->nullable();
+            $table->foreign('cinema_id')->references('id')->on('cinema')->onDelete('cascade');
+            $table->timestamps();
+        });
+    
+        Schema::create('cinema_seat', function($table) {
+            $table->increments('id');
+            $table->integer('seat_number');            
+            $table->integer('type');
+            $table->integer('cinema_id')->unsigned()->nullable();
             $table->foreign('cinema_id')->references('id')->on('cinema')->onDelete('cascade');
             $table->timestamps();
         });
 
-        Schema::create('movies_time', function($table) {
+        Schema::create('movie', function($table) {
             $table->increments('id');
-            $table->date('date');
-            $table->dateTime('start');
-            $table->dateTime('end');
-            $table->integer('seat_number');
-            $table->integer('movies_id')->unsigned()->nullable();
-            $table->foreign('movies_id')->references('id')->on('movies')->onDelete('cascade');
+            $table->string('name');
+            $table->dateTime('duration');
+            $table->timestamps();
+        });
+        
+        Schema::create('show', function($table) {
+            $table->increments('id');
+            $table->dateTime('date');
+            $table->dateTime('startTime');
+            $table->dateTime('endTime');
+            $table->integer('cinema_id')->unsigned()->nullable();
+            $table->integer('movie_id')->unsigned()->nullable();
+            $table->foreign('cinema_id')->references('id')->on('cinema')->onDelete('cascade');
+            $table->foreign('movie_id')->references('id')->on('movie')->onDelete('cascade');
+            $table->timestamps();
+        });
+
+        Schema::create('booking', function($table) {
+            $table->increments('id');
+            $table->integer('no_of_seats');
+            $table->dateTime('timestamp');
+            $table->integer('status');
+            $table->integer('user_id')->unsigned()->nullable();
+            $table->integer('show_id')->unsigned()->nullable();
+            $table->foreign('show_id')->references('id')->on('show')->onDelete('cascade');
+            $table->timestamps();
+        });
+
+        Schema::create('show_seat', function($table) {
+            $table->increments('id');
+            $table->integer('status');
+            $table->double('price');
+            $table->integer('show_id')->unsigned()->nullable();
+            $table->integer('booking_id')->unsigned()->nullable();
+            $table->foreign('show_id')->references('id')->on('show')->onDelete('cascade');
+            $table->foreign('booking_id')->references('id')->on('booking')->onDelete('cascade');
+            $table->timestamps();
+        });
+
+        Schema::create('payment', function($table) {
+            $table->increments('id');
+            $table->double('amount');
+            $table->dateTime('timestamp');
+            $table->text('transactiopn_id');
+            $table->enum('payment_method', ['online', 'cash']);
+            $table->integer('booking_id')->unsigned()->nullable();
+            $table->foreign('booking_id')->references('id')->on('booking')->onDelete('cascade');
             $table->timestamps();
         });
     }
